@@ -35,6 +35,6 @@ def build_model():
 if __name__ == "__main__":
     from torchsummary import summary
     DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-    mdl = build_model()
+    mdl = create_model()
     print(mdl)
     # summary(mdl, (3, imageSize, imageSize))
