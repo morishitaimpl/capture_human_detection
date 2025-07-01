@@ -35,7 +35,7 @@ def detect_humans_realtime(model_path=None):
     
     data_transforms = T.Compose([T.ToTensor()])
     
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(1)
     if not cap.isOpened():
         print("Error: カメラを開けませんでした")
         return
