@@ -46,7 +46,7 @@ python predict_dir_imgs.py [model_path] [directory_path]
 
 ### モデル学習
 ```bash
-python train.py
+python train.py [任意の名前][dataset_path][annotation_file]
 ```
 
 ## 特徴
