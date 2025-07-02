@@ -29,38 +29,6 @@ def load_model(model_path=None):
     model.eval()
     return model
 
-def draw_detection_results(img, boxes, scores, labels, human_detected, font, font_scale, thickness):
-    """検出結果を画像に描画する"""
-    for i in range(len(scores)):
-        if scores[i] < cf.thDetection:
-            continue
-        
-        if labels[i] == 1:
-            x1, y1, x2, y2 = boxes[i].astype(int)
-            
-            cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255), 2)
-            
-            label_text = f"Person: {scores[i]:.3f}"
-            label_size = cv2.getTextSize(label_text, font, font_scale, thickness)[0]
-            
-            cv2.rectangle(img, (x1, y1 - label_size[1] - 10), 
-                        (x1 + label_size[0], y1), (0, 0, 255), -1)
-            
-            cv2.putText(img, label_text, (x1, y1 - 5), 
-                      font, font_scale, (255, 255, 255), thickness)
-    
-    if human_detected:
-        warning_text = "There are people. Caution."
-        text_size = cv2.getTextSize(warning_text, font, 1.0, 2)[0]
-        text_x = (img.shape[1] - text_size[0]) // 2
-        text_y = 40
-        
-        cv2.rectangle(img, (text_x - 10, text_y - text_size[1] - 10), 
-                    (text_x + text_size[0] + 10, text_y + 10), (0, 0, 255), -1)
-        
-        cv2.putText(img, warning_text, (text_x, text_y), 
-                  font, 1.0, (255, 255, 255), 2)
-
 def detect_humans_realtime(model_path=None):
     """リアルタイム人検出"""
     model = load_model(model_path)
@@ -109,13 +77,33 @@ def detect_humans_realtime(model_path=None):
                 if scores[i] < cf.thDetection:
                     continue
                 
-                if labels[i] == 1:
+                if labels[i] == 1:  # 人のクラス
                     human_detected = True
+                    
+                    x1, y1, x2, y2 = boxes[i].astype(int)
+                    
+                    cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
+                    
+                    label_text = f"Person: {scores[i]:.3f}"
+                    label_size = cv2.getTextSize(label_text, font, font_scale, thickness)[0]
+                    
+                    cv2.rectangle(frame, (x1, y1 - label_size[1] - 10), 
+                                (x1 + label_size[0], y1), (0, 0, 255), -1)
+                    
+                    cv2.putText(frame, label_text, (x1, y1 - 5), 
+                              font, font_scale, (255, 255, 255), thickness)
             
-            draw_detection_results(frame, boxes, scores, labels, human_detected, font, font_scale, thickness)
-            draw_detection_results(red_img, boxes, scores, labels, human_detected, font, font_scale, thickness)
-            draw_detection_results(green_img, boxes, scores, labels, human_detected, font, font_scale, thickness)
-            draw_detection_results(blue_img, boxes, scores, labels, human_detected, font, font_scale, thickness)
+            if human_detected:
+                warning_text = "There are people. Caution."
+                text_size = cv2.getTextSize(warning_text, font, 1.0, 2)[0]
+                text_x = (frame.shape[1] - text_size[0]) // 2
+                text_y = 40
+                
+                cv2.rectangle(frame, (text_x - 10, text_y - text_size[1] - 10), 
+                            (text_x + text_size[0] + 10, text_y + 10), (0, 0, 255), -1)
+                
+                cv2.putText(frame, warning_text, (text_x, text_y), 
+                          font, 1.0, (255, 255, 255), 2)
             
             cv2.imshow('Human Detection', frame)
             cv2.imshow('Red Filter', red_img)
