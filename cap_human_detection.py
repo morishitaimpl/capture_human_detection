@@ -35,7 +35,7 @@ def detect_humans_realtime(model_path=None):
     
     data_transforms = T.Compose([T.ToTensor()])
     
-    cap = cv2.VideoCapture(1)
+    cap = cv2.VideoCapture(0, cv2.CAP_AVFOUNDATION)
     if not cap.isOpened():
         print("Error: カメラを開けませんでした")
         return
@@ -53,6 +53,11 @@ def detect_humans_realtime(model_path=None):
                 print("Error: フレームを読み込めませんでした")
                 break
             
+            b, g, r = cv2.split(frame)
+            # R, G, B フィルタ画像を作成（他チャンネルをゼロにする）
+            red_img   = cv2.merge([np.zeros_like(b), np.zeros_like(g), r])
+            green_img = cv2.merge([np.zeros_like(b), g, np.zeros_like(r)])
+            blue_img  = cv2.merge([b, np.zeros_like(g), np.zeros_like(r)])
             frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             pil_image = Image.fromarray(frame_rgb)
             
@@ -89,7 +94,7 @@ def detect_humans_realtime(model_path=None):
                               font, font_scale, (255, 255, 255), thickness)
             
             if human_detected:
-                warning_text = "人がいます。注意してください。"
+                warning_text = "There are people. Caution."
                 text_size = cv2.getTextSize(warning_text, font, 1.0, 2)[0]
                 text_x = (frame.shape[1] - text_size[0]) // 2
                 text_y = 40
@@ -101,7 +106,9 @@ def detect_humans_realtime(model_path=None):
                           font, 1.0, (255, 255, 255), 2)
             
             cv2.imshow('Human Detection', frame)
-            
+            cv2.imshow('Red Filter', red_img)
+            cv2.imshow('Green Filter', green_img)
+            cv2.imshow('Blue Filter', blue_img)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
                 
@@ -115,4 +122,3 @@ def detect_humans_realtime(model_path=None):
 if __name__ == "__main__":
     model_path = sys.argv[1] if len(sys.argv) > 1 else None
     detect_humans_realtime(model_path)
-
